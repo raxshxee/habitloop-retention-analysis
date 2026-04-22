@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HabitLoop Retention Intelligence</title>
+  <style>
+    :root {
+      --ink: #182026;
+      --muted: #5d6872;
+      --line: #d9e0e5;
+      --paper: #83b29b;
+      --panel: #ffffff;
+      --teal: #117a7a;
+      --forest: #47735d;
+      --coral: #c94f4f;
+      --gold: #b78317;
+      --green: #2f7d4f;
+      --blue: #3867a8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.45;
+    }
+    header {
+      padding: 34px 24px 22px;
+      border-bottom: 1px solid var(--line);
+      background: #f7fbf8;
+    }
+    main { max-width: 1180px; margin: 0 auto; padding: 24px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: 34px; margin-bottom: 10px; letter-spacing: 0; }
+    h2 { font-size: 22px; margin-bottom: 14px; }
+    h3 { font-size: 16px; margin-bottom: 8px; }
+    .lede { max-width: 900px; color: var(--muted); font-size: 17px; margin-bottom: 0; }
+    .grid { display: grid; gap: 16px; }
+    .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 22px; }
+    .two { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); }
+    .three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 1px 0 rgba(24,32,38,0.03);
+    }
+    .kpi .label { color: var(--muted); font-size: 13px; }
+    .kpi .value { font-size: 28px; font-weight: 700; margin-top: 8px; }
+    .bar-list { display: grid; gap: 11px; }
+    .bar-row { display: grid; gap: 6px; }
+    .bar-meta { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
+    .bar-track { height: 12px; background: #edf1f3; border-radius: 6px; overflow: hidden; }
+    .bar-fill { height: 100%; background: var(--teal); border-radius: 6px; }
+    .stage .bar-fill { background: var(--blue); }
+    .risk-high { color: var(--coral); }
+    .risk-medium { color: var(--gold); }
+    .risk-low { color: var(--green); }
+    .campaigns { margin-top: 16px; }
+    .campaign-card { display: grid; gap: 10px; }
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 4px 8px;
+      color: var(--muted);
+      font-size: 12px;
+      background: #fbfcfc;
+    }
+    .small { color: var(--muted); font-size: 14px; margin-bottom: 0; }
+    .quote {
+      border-left: 3px solid var(--teal);
+      padding-left: 12px;
+      color: #25313a;
+      font-size: 14px;
+    }
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    select, button {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 10px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+    }
+    button { cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border-bottom: 1px solid var(--line); text-align: left; padding: 10px 8px; vertical-align: top; }
+    th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0; }
+    details.section {
+      margin-top: 18px;
+      background: var(--panel);
+      border: 1px solid rgba(71,115,93,0.45);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    details.section > summary {
+      list-style: none;
+      cursor: pointer;
+      background: var(--forest);
+      color: #ffffff;
+      padding: 16px 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    details.section > summary::-webkit-details-marker { display: none; }
+    details.section > summary::after {
+      content: ">";
+      font-size: 18px;
+      transform: rotate(90deg);
+      transition: transform 0.18s ease;
+    }
+    details.section:not([open]) > summary::after { transform: rotate(0deg); }
+    .section-body { padding: 18px; }
+    .section-note {
+      color: var(--muted);
+      margin-bottom: 16px;
+      max-width: 900px;
+    }
+    .toolbar {
+      background: rgba(255,255,255,0.76);
+      border: 1px solid rgba(71,115,93,0.35);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 18px;
+    }
+    .insight-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .insight-card {
+      background: #f7fbf8;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .insight-card strong { display: block; margin-bottom: 6px; }
+    .matrix-wrap { overflow-x: auto; margin-top: 16px; }
+    .plan-box {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .flow-list { margin: 0; padding-left: 18px; }
+    .flow-list li { margin-bottom: 8px; }
+    footer { color: #183226; font-size: 13px; padding: 18px 24px 34px; max-width: 1180px; margin: 0 auto; }
+    @media (max-width: 900px) {
+      .kpis, .two, .three, .insight-grid, .plan-box { grid-template-columns: 1fr; }
+      h1 { font-size: 27px; }
+      main { padding: 16px; }
+      header { padding: 26px 16px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>HabitLoop Retention Intelligence</h1>
+    <p class="lede">Real App Store review mining for consumer habit apps, translated into lifecycle risks, journey stages, and retention campaign briefs.</p>
+  </header>
+  <main>
+    <section class="toolbar">
+      <div class="filters">
+        <label>
+          Category view
+          <select id="categoryFilter"></select>
+        </label>
+        <label>
+          App view
+          <select id="appFilter"></select>
+        </label>
+      </div>
+      <p class="small">Use this to switch between the full benchmark, a competitive category, and one app at a time. The KPI cards, charts, campaign briefs, and review explorer update together.</p>
+    </section>
+    <section class="grid kpis" id="kpis"></section>
+    <details class="section" open>
+      <summary>1. Retention Signal Map</summary>
+      <div class="section-body">
+        <p class="section-note">This section answers: what are users repeatedly saying that could affect retention? The left chart shows review themes; the right chart maps those themes to lifecycle moments where a marketer can act.</p>
+        <div class="insight-grid" id="appInsights"></div>
+        <section class="grid two">
+          <article class="card">
+            <h2>Top Retention Signals</h2>
+            <div class="bar-list" id="themes"></div>
+          </article>
+          <article class="card">
+            <h2>Lifecycle Stage Pressure</h2>
+            <div class="bar-list stage" id="stages"></div>
+          </article>
+        </section>
+        <article class="card campaigns">
+          <h2>Cross-App Pattern Matrix</h2>
+          <p class="small" id="patternNote"></p>
+          <div class="matrix-wrap" id="patternMatrix"></div>
+        </article>
+      </div>
+    </details>
+    <details class="section" open>
+      <summary>2. Lifecycle Campaign Briefs</summary>
+      <div class="section-body">
+        <p class="section-note">This section turns the strongest signals into campaign ideas. Each card includes the customer signal, the trigger moment, and the message angle for a CRM or lifecycle flow.</p>
+        <section class="grid three" id="campaigns"></section>
+      </div>
+    </details>
+    <details class="section" open>
+      <summary>3. Review Explorer</summary>
+      <div class="section-body">
+        <p class="section-note">This section lets you inspect the real customer language behind the analysis. Filter by app, theme, and risk level to explain the insight with actual review examples.</p>
+        <div class="filters">
+          <select id="themeFilter"></select>
+          <select id="riskFilter">
+            <option value="All">All risk levels</option>
+            <option value="High">High risk</option>
+            <option value="Medium">Medium risk</option>
+            <option value="Low">Low risk</option>
+          </select>
+          <button id="resetButton">Reset</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>App</th>
+              <th>Rating</th>
+              <th>Theme</th>
+              <th>Lifecycle</th>
+              <th>Customer Language</th>
+            </tr>
+          </thead>
+          <tbody id="quoteRows"></tbody>
+        </table>
+      </div>
+    </details>
+    <details class="section" open>
+      <summary>4. Campaign Decision Lab</summary>
+      <div class="section-body">
+        <p class="section-note">This section is the strategic layer: choose an app view, a retention signal, and a trigger context to generate a sharper lifecycle campaign plan.</p>
+        <div class="filters">
+          <label>
+            App scope
+            <select id="labAppFilter"></select>
+          </label>
+          <label>
+            Signal problem
+            <select id="labSignalFilter"></select>
+          </label>
+          <label>
+            Trigger context
+            <select id="labTriggerFilter">
+              <option value="Auto">Auto-match trigger</option>
+              <option value="Activation">Activation</option>
+              <option value="Engagement">Engagement</option>
+              <option value="Monetization / Save">Monetization / Save</option>
+              <option value="Save">Save</option>
+              <option value="Expansion">Expansion</option>
+              <option value="Advocacy">Advocacy</option>
+            </select>
+          </label>
+        </div>
+        <div class="plan-box">
+          <article class="card" id="labPlan"></article>
+          <article class="card">
+            <h2>Supporting Review Evidence</h2>
+            <div id="labEvidence"></div>
+          </article>
+        </div>
+      </div>
+    </details>
+  </main>
+  <footer>
+    Source: Apple's public App Store review feeds. This dashboard uses real public review text collected for portfolio research.
+  </footer>
+  <script>
+    const DATA = __DATA_JSON__;
+    function entries(obj) { return Object.entries(obj || {}); }
+    function pct(count, total) { return total ? Math.round((count / total) * 1000) / 10 : 0; }
+    function currentCategory() { return document.getElementById("categoryFilter").value; }
+    function currentApp() { return document.getElementById("appFilter").value; }
+    function filteredReviews() {
+      const category = currentCategory();
+      const app = currentApp();
+      return DATA.reviews.filter(review => (category === "All" || review.category === category) && (app === "All" || review.app === app));
+    }
+    function countBy(rows, key) {
+      return rows.reduce((acc, row) => {
+        acc[row[key]] = (acc[row[key]] || 0) + 1;
+        return acc;
+      }, {});
+    }
+    function average(rows, key) {
+      if (!rows.length) return 0;
+      return rows.reduce((sum, row) => sum + Number(row[key] || 0), 0) / rows.length;
+    }
+    function escapeHtml(text) {
+      return String(text || "").replace(/[&<>"']/g, value => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[value]));
+    }
+    function renderKpis() {
+      const rows = filteredReviews();
+      const apps = new Set(rows.map(row => row.app));
+      const mediumHighRisk = rows.filter(row => row.risk === "Medium" || row.risk === "High").length;
+      const kpis = [
+        ["Reviews analyzed", rows.length.toLocaleString()],
+        ["Apps benchmarked", apps.size],
+        ["Average rating", average(rows, "rating").toFixed(2)],
+        ["Med/high risk share", pct(mediumHighRisk, rows.length) + "%"],
+      ];
+      document.getElementById("kpis").innerHTML = kpis.map(([label, value]) => `<article class="card kpi"><div class="label">${label}</div><div class="value">${value}</div></article>`).join("");
+    }
+    function renderBars(id, obj, total) {
+      const sorted = entries(obj).sort((a, b) => b[1] - a[1]);
+      const max = Math.max(...sorted.map(([, value]) => value), 1);
+      document.getElementById(id).innerHTML = sorted.map(([label, value]) => `
+        <div class="bar-row">
+          <div class="bar-meta"><strong>${label}</strong><span>${value} (${pct(value, total)}%)</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.max(5, value / max * 100)}%"></div></div>
+        </div>`).join("");
+    }
+    function renderCampaigns() {
+      const rows = filteredReviews();
+      const themeCounts = countBy(rows, "theme");
+      const campaignLookup = Object.fromEntries(DATA.campaigns.map(item => [item.theme, item]));
+      const campaigns = entries(themeCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([theme, count]) => {
+          const base = campaignLookup[theme] || {};
+          return {
+            theme,
+            count,
+            share: pct(count, rows.length),
+            stage: rows.find(row => row.theme === theme)?.stage || base.stage || "Engagement",
+            campaign: base.campaign || "Lifecycle education nudge",
+            trigger: base.trigger || "General engagement signal",
+            message: base.message || "Use customer language to clarify the next best action.",
+            examples: rows
+              .filter(row => row.theme === theme)
+              .sort((a, b) => a.rating - b.rating || a.sentiment - b.sentiment)
+              .slice(0, 2)
+              .map(row => ({ app: row.app, rating: row.rating, quote: row.text }))
+          };
+        });
+      document.getElementById("campaigns").innerHTML = campaigns.map(item => `
+        <article class="card campaign-card">
+          <span class="badge">${item.stage} | ${item.share}% of reviews</span>
+          <h3>${item.campaign}</h3>
+          <p class="small"><strong>Signal:</strong> ${item.theme}</p>
+          <p class="small"><strong>Trigger:</strong> ${item.trigger}</p>
+          <p>${item.message}</p>
+          ${item.examples.map(example => `<div class="quote">"${escapeHtml(example.quote)}"<br><span class="small">${example.app}, ${example.rating} star</span></div>`).join("")}
+        </article>`).join("");
+    }
+    function renderAppInsights() {
+      const category = currentCategory();
+      const app = currentApp();
+      if (app === "All") {
+        const categorySummary = category === "All" ? null : DATA.category_summaries.find(item => item.category === category);
+        const highestRisk = DATA.cross_app_patterns.highest_risk_app;
+        document.getElementById("appInsights").innerHTML = `
+          <article class="insight-card"><strong>${categorySummary ? "Competitive pair" : "Benchmark design"}</strong>${categorySummary ? `${categorySummary.competitive_set}: ${categorySummary.apps.join(" vs ")}` : DATA.cross_app_patterns.why_these_apps}</article>
+          <article class="insight-card"><strong>Shared pain points</strong>${categorySummary ? categorySummary.top_signals.map(item => `${item.theme} (${item.share}%)`).join("<br>") : DATA.cross_app_patterns.common_themes.slice(0, 4).join(", ")}</article>
+          <article class="insight-card"><strong>Highest risk app</strong>${categorySummary ? categorySummary.highest_risk_app : highestRisk.app}<br>${categorySummary ? categorySummary.highest_risk_share : highestRisk.medium_high_risk_share}% medium/high risk</article>
+          <article class="insight-card"><strong>Benchmark purpose</strong>${categorySummary ? "Compare competing apps in the same use case and identify which retention pain point each one owns." : "Separate category-wide retention problems from app-specific gaps."}</article>
+        `;
+        return;
+      }
+      const summary = DATA.app_summaries.find(item => item.app === app);
+      document.getElementById("appInsights").innerHTML = `
+        <article class="insight-card"><strong>Top signal</strong>${summary.top_signal}<br>${summary.top_signal_share}% of this app's reviews</article>
+        <article class="insight-card"><strong>Top lifecycle pressure</strong>${summary.top_stage}</article>
+        <article class="insight-card"><strong>Risk share</strong>${summary.medium_high_risk_share}% medium/high risk</article>
+        <article class="insight-card"><strong>Over-indexes on</strong>${summary.over_indexes_on.map(item => `${item.theme} (+${item.points_above_benchmark} pts)`).join("<br>")}</article>
+      `;
+    }
+    function renderPatternMatrix() {
+      const category = currentCategory();
+      const app = currentApp();
+      const matrix = DATA.cross_app_patterns.theme_matrix;
+      let apps = app === "All" ? Object.keys(matrix) : [app];
+      if (category !== "All") {
+        apps = apps.filter(appName => DATA.reviews.some(row => row.app === appName && row.category === category));
+      }
+      const themes = [...new Set(apps.flatMap(appName => Object.keys(matrix[appName] || {})))];
+      document.getElementById("patternNote").textContent = app === "All"
+        ? "Percent of each app's reviews that fall into each signal. In category view, this compares direct competitors in the same use case."
+        : "This app view shows which signals dominate for the selected product.";
+      document.getElementById("patternMatrix").innerHTML = `
+        <table>
+          <thead><tr><th>App</th>${themes.map(theme => `<th>${escapeHtml(theme)}</th>`).join("")}</tr></thead>
+          <tbody>
+            ${apps.map(appName => `<tr><td>${escapeHtml(appName)}</td>${themes.map(theme => `<td>${matrix[appName]?.[theme] || 0}%</td>`).join("")}</tr>`).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+    function triggerPlan(stage, theme, rows) {
+      const signalMoves = {
+        "Onboarding friction": ["Replace broad welcome copy with a single first-win checklist.", "Send a 2-step getting-started email using beginner language from reviews.", "Suppress upgrade prompts until the user completes the first meaningful action."],
+        "Habit break / streak loss": ["Detect a missed routine and send a fresh-start message instead of guilt-led copy.", "Offer a one-tap comeback action that restores momentum without pretending the lapse did not happen.", "Create a 3-day reset mini-challenge for users with broken streak language."],
+        "Pricing / subscription concern": ["Show a personal value recap before renewal or trial end.", "Segment price-sensitive users into plan-flexibility messaging before discounts.", "Rewrite billing/save copy around outcomes, not feature lists."],
+        "Feature request": ["Cluster repeated requests into a feedback-to-roadmap email.", "Invite high-intent users into a beta/waitlist instead of letting feature gaps become churn.", "Send educational content that shows existing workarounds where available."],
+        "Bug / reliability": ["Trigger a trust-repair message after reliability language appears.", "Acknowledge the interrupted routine and explain the fix/status plainly.", "Route users to a low-friction support path and follow up after resolution."],
+        "Notification / reminder issue": ["Offer reminder frequency and tone controls.", "Send a preference-reset prompt before users mute all reminders.", "Test softer copy for users who describe notifications as spammy or annoying."],
+        "Support / trust issue": ["Prioritize human-sounding account or billing reassurance.", "Send a control-first message: cancel, pause, refund route, or account help.", "Follow up with a trust confirmation after support resolution."],
+        "Motivation / content fatigue": ["Introduce novelty based on the user's prior behavior.", "Send a content refresh campaign with choice: easier, harder, shorter, or different.", "Use fatigue language to trigger a challenge recalibration flow."],
+        "Positive habit value": ["Ask for referral/review only after clear outcome language.", "Turn positive outcomes into testimonial-style lifecycle proof.", "Invite advocates into sharing, streak celebration, or community moments."],
+        "Unspecified churn risk": ["Ask a single diagnostic question before sending generic save copy.", "Route low-rating users into support, value proof, or preference reset based on their answer.", "Use review language to refine the next segmentation rule."],
+        "General feedback": ["Send a lightweight education nudge connected to the user's most recent action.", "Ask for one-click feedback to reveal the hidden friction.", "Use the response to move the user into a more specific lifecycle flow."],
+      };
+      const stageLens = {
+        "Activation": "Frame it as a first-week journey: reduce confusion before asking for commitment.",
+        "Engagement": "Frame it as behavior recovery: make the next session feel easy and emotionally safe.",
+        "Monetization / Save": "Frame it as value protection: prove progress before discussing payment or discounting.",
+        "Save": "Frame it as trust repair: acknowledge friction and give the user control.",
+        "Expansion": "Frame it as product participation: convert requests into roadmap, beta, or education moments.",
+        "Advocacy": "Frame it as proof amplification: ask happy users to share only after an outcome is visible.",
+      };
+      const evidenceNote = rows.length
+        ? `Use ${rows.length} matching reviews to prioritize copy themes and objections.`
+        : "Collect more matching reviews before scaling this campaign.";
+      return {
+        steps: signalMoves[theme] || [`Use ${theme.toLowerCase()} language to choose the next best lifecycle message.`],
+        lens: stageLens[stage] || "Frame it around the user's current lifecycle moment.",
+        metric: metricFor(stage, theme),
+        segment: segmentFor(stage, theme),
+        evidenceNote,
+      };
+    }
+    function metricFor(stage, theme) {
+      if (theme === "Pricing / subscription concern") return "Trial-to-paid conversion, renewal save rate, cancellation-page recovery.";
+      if (theme === "Habit break / streak loss") return "Return rate after missed day, sessions in next 7 days, streak restart rate.";
+      if (theme === "Bug / reliability" || theme === "Support / trust issue") return "Support deflection, issue recovery rate, negative-review follow-up improvement.";
+      if (theme === "Notification / reminder issue") return "Reminder opt-in retention, notification mute rate, return sessions from reminders.";
+      if (stage === "Advocacy") return "Review/referral conversion, share clicks, advocate cohort retention.";
+      return "Next-session rate, campaign click-through, and 7-day retained usage.";
+    }
+    function segmentFor(stage, theme) {
+      if (theme === "Pricing / subscription concern") return "Trial users, renewal-window users, cancellation-intent users, and low-rating paid users.";
+      if (theme === "Habit break / streak loss") return "Users with a recent usage gap, broken streak, or declining session frequency.";
+      if (theme === "Motivation / content fatigue") return "Previously active users with declining completion or boredom language.";
+      if (theme === "Feature request") return "Power users and review authors asking for missing capabilities.";
+      if (theme === "Positive habit value") return "High-rating users who describe daily use, progress, or emotional value.";
+      return `${stage} users showing ${theme.toLowerCase()} language or behavior.`;
+    }
+    function renderLabFilters() {
+      const apps = ["All", ...Object.keys(DATA.apps)];
+      document.getElementById("labAppFilter").innerHTML = apps.map(app => `<option value="${app}">${app === "All" ? "All apps" : app}</option>`).join("");
+      const themes = Object.keys(DATA.theme_counts);
+      document.getElementById("labSignalFilter").innerHTML = themes.map(theme => `<option value="${theme}">${theme}</option>`).join("");
+      document.getElementById("labSignalFilter").value = "Pricing / subscription concern";
+    }
+    function renderCampaignLab() {
+      const app = document.getElementById("labAppFilter").value;
+      const theme = document.getElementById("labSignalFilter").value;
+      const triggerChoice = document.getElementById("labTriggerFilter").value;
+      const rows = DATA.reviews.filter(row => (app === "All" || row.app === app) && row.theme === theme);
+      const base = DATA.campaigns.find(item => item.theme === theme) || {};
+      const stage = triggerChoice === "Auto" ? (rows[0]?.stage || base.stage || "Engagement") : triggerChoice;
+      const risky = rows.filter(row => row.risk === "Medium" || row.risk === "High").length;
+      const plan = triggerPlan(stage, theme, rows);
+      document.getElementById("labPlan").innerHTML = `
+        <span class="badge">${stage} | ${rows.length} matching reviews | ${pct(risky, rows.length)}% med/high risk</span>
+        <h2>${base.campaign || "Lifecycle Campaign Plan"}</h2>
+        <p><strong>Signal problem:</strong> ${escapeHtml(theme)}</p>
+        <p><strong>Trigger problem:</strong> ${escapeHtml(base.trigger || "Relevant behavior or feedback signal")}</p>
+        <p><strong>Message angle:</strong> ${escapeHtml(base.message || "Clarify the next best action using customer language.")}</p>
+        <p><strong>Strategic lens:</strong> ${escapeHtml(plan.lens)}</p>
+        <h3>Suggested flow</h3>
+        <ol class="flow-list">${plan.steps.map(step => `<li>${escapeHtml(step)}</li>`).join("")}</ol>
+        <p><strong>Suggested segment:</strong> ${escapeHtml(plan.segment)}</p>
+        <p><strong>Success metric:</strong> ${escapeHtml(plan.metric)}</p>
+        <p class="small"><strong>Evidence note:</strong> ${escapeHtml(plan.evidenceNote)}</p>
+      `;
+      const evidence = rows
+        .sort((a, b) => a.rating - b.rating || a.sentiment - b.sentiment)
+        .slice(0, 5);
+      document.getElementById("labEvidence").innerHTML = evidence.length ? evidence.map(row => `
+        <div class="quote">"${escapeHtml(row.text)}"<br><span class="small">${escapeHtml(row.app)}, ${row.rating} star, ${row.risk} risk</span></div>
+      `).join("") : `<p class="small">No matching reviews for this filter.</p>`;
+    }
+    function riskClass(risk) { return risk === "High" ? "risk-high" : risk === "Medium" ? "risk-medium" : "risk-low"; }
+    function renderCategoryFilter() {
+      const categories = ["All", ...Object.keys(DATA.categories || {})];
+      document.getElementById("categoryFilter").innerHTML = categories.map(category => `<option value="${category}">${category === "All" ? "All categories" : category}</option>`).join("");
+    }
+    function renderAppFilter() {
+      const category = currentCategory();
+      const appsInScope = Object.keys(DATA.apps).filter(app => category === "All" || DATA.reviews.some(row => row.app === app && row.category === category));
+      const current = document.getElementById("appFilter").value || "All";
+      const apps = ["All", ...appsInScope];
+      document.getElementById("appFilter").innerHTML = apps.map(app => `<option value="${app}">${app === "All" ? "All apps" : app}</option>`).join("");
+      document.getElementById("appFilter").value = apps.includes(current) ? current : "All";
+    }
+    function renderFilters() {
+      const themes = ["All", ...new Set(filteredReviews().map(q => q.theme))];
+      const selectedTheme = document.getElementById("themeFilter").value || "All";
+      document.getElementById("themeFilter").innerHTML = themes.map(theme => `<option value="${theme}">${theme === "All" ? "All themes" : theme}</option>`).join("");
+      document.getElementById("themeFilter").value = themes.includes(selectedTheme) ? selectedTheme : "All";
+    }
+    function renderQuotes() {
+      const theme = document.getElementById("themeFilter").value;
+      const risk = document.getElementById("riskFilter").value;
+      const rows = filteredReviews()
+        .filter(q => (theme === "All" || q.theme === theme) && (risk === "All" || q.risk === risk))
+        .sort((a, b) => a.rating - b.rating || a.sentiment - b.sentiment)
+        .slice(0, 40);
+      document.getElementById("quoteRows").innerHTML = rows.map(q => `
+        <tr>
+          <td>${escapeHtml(q.app)}</td>
+          <td>${q.rating}</td>
+          <td>${escapeHtml(q.theme)}<br><span class="${riskClass(q.risk)}">${q.risk}</span></td>
+          <td>${escapeHtml(q.stage)}</td>
+          <td><strong>${escapeHtml(q.title)}</strong><br>${escapeHtml(q.text)}</td>
+        </tr>`).join("");
+    }
+    function renderAll() {
+      const rows = filteredReviews();
+      renderKpis();
+      renderAppInsights();
+      renderBars("themes", countBy(rows, "theme"), rows.length);
+      renderBars("stages", countBy(rows, "stage"), rows.length);
+      renderPatternMatrix();
+      renderCampaigns();
+      renderFilters();
+      renderQuotes();
+    }
+    function handleCategoryChange() {
+      renderAppFilter();
+      renderAll();
+    }
+    document.getElementById("categoryFilter").addEventListener("change", handleCategoryChange);
+    document.getElementById("appFilter").addEventListener("change", renderAll);
+    document.getElementById("themeFilter").addEventListener("change", renderQuotes);
+    document.getElementById("riskFilter").addEventListener("change", renderQuotes);
+    document.getElementById("labAppFilter").addEventListener("change", renderCampaignLab);
+    document.getElementById("labSignalFilter").addEventListener("change", renderCampaignLab);
+    document.getElementById("labTriggerFilter").addEventListener("change", renderCampaignLab);
+    document.getElementById("resetButton").addEventListener("click", () => {
+      document.getElementById("themeFilter").value = "All";
+      document.getElementById("riskFilter").value = "All";
+      renderAll();
+    });
+    renderCategoryFilter();
+    renderAppFilter();
+    renderLabFilters();
+    renderAll();
+    renderCampaignLab();
+  </script>
+</body>
+</html>
