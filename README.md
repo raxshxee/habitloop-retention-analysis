@@ -10,7 +10,7 @@ Public reviews often reveal churn drivers that product analytics alone may miss,
 
 ## Data Source
 
-Collected from Apple public App Store review feeds. No synthetic data used.
+Collected from Apple public App Store review feeds.
 
 ### Competitive App Categories
 - Language learning: Duolingo vs Babbel  
